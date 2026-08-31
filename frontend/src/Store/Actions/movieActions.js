@@ -358,6 +358,13 @@ export const defaultState = {
   allIds: [],
   facets: {},
   jumpBar: {},
+  catalog: {
+    isFetching: false,
+    isPopulated: false,
+    error: null,
+    items: [],
+    itemMap: {}
+  },
   sortKey: 'sortTitle',
   sortDirection: sortDirections.ASCENDING,
   pendingChanges: {},
@@ -374,6 +381,7 @@ export const persistState = [
 // Actions Types
 
 export const FETCH_MOVIES = 'movies/fetchMovies';
+export const FETCH_MOVIE_CATALOG = 'movies/fetchMovieCatalog';
 export const FETCH_MOVIE_FACETS = 'movies/fetchMovieFacets';
 export const SET_MOVIE_VALUE = 'movies/setMovieValue';
 export const SAVE_MOVIE = 'movies/saveMovie';
@@ -389,6 +397,7 @@ export const TOGGLE_MOVIE_MONITORED = 'movies/toggleMovieMonitored';
 // Action Creators
 
 export const fetchMovies = createThunk(FETCH_MOVIES);
+export const fetchMovieCatalog = createThunk(FETCH_MOVIE_CATALOG);
 export const fetchMovieFacets = createThunk(FETCH_MOVIE_FACETS);
 export const saveMovie = createThunk(SAVE_MOVIE, (payload) => {
   const newPayload = {
@@ -444,6 +453,41 @@ function getSaveAjaxOptions({ ajaxOptions, payload }) {
 // Action Handlers
 
 export const actionHandlers = handleThunks({
+
+  [FETCH_MOVIE_CATALOG]: (getState, _payload, dispatch) => {
+    dispatch(set({ section: 'movies.catalog', isFetching: true }));
+
+    const { request, abortRequest } = createAjaxRequest({ url: '/movie/catalog' });
+
+    request.done((data) => {
+      dispatch(batchActions([
+        update({ section: 'movies.catalog', data: data.records }),
+        set({
+          section: 'movies.catalog',
+          isFetching: false,
+          isPopulated: true,
+          error: null
+        }),
+        set({
+          section,
+          facets: data.facets,
+          totalRecords: data.facets.totalRecords,
+          error: null
+        })
+      ]));
+    });
+
+    request.fail((xhr) => {
+      dispatch(set({
+        section: 'movies.catalog',
+        isFetching: false,
+        isPopulated: false,
+        error: xhr.aborted ? null : xhr
+      }));
+    });
+
+    return abortRequest;
+  },
 
   [FETCH_MOVIE_FACETS]: (getState, _payload, dispatch) => {
     const { request, abortRequest } = createAjaxRequest({ url: '/movie/facets' });

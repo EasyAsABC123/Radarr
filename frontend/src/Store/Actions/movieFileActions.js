@@ -179,12 +179,23 @@ export const actionHandlers = handleThunks({
 
     deletePromise.done(() => {
       const movies = getState().movies.items;
+      const catalogMovies = getState().movies.catalog.items;
       const moviesWithRemovedFiles = _.filter(movies, { movieFileId });
+      const catalogMoviesWithRemovedFiles = _.filter(catalogMovies, { movieFileId });
 
       dispatch(batchActions([
         ...moviesWithRemovedFiles.map((movie) => {
           return updateItem({
             section: movieSection,
+            ...movie,
+            movieFileId: 0,
+            hasFile: false
+          });
+        }),
+
+        ...catalogMoviesWithRemovedFiles.map((movie) => {
+          return updateItem({
+            section: 'movies.catalog',
             ...movie,
             movieFileId: 0,
             hasFile: false
@@ -210,8 +221,14 @@ export const actionHandlers = handleThunks({
 
     promise.done(() => {
       const movies = getState().movies.items;
+      const catalogMovies = getState().movies.catalog.items;
       const moviesWithRemovedFiles = movieFileIds.reduce((acc, movieFileId) => {
         acc.push(..._.filter(movies, { movieFileId }));
+
+        return acc;
+      }, []);
+      const catalogMoviesWithRemovedFiles = movieFileIds.reduce((acc, movieFileId) => {
+        acc.push(..._.filter(catalogMovies, { movieFileId }));
 
         return acc;
       }, []);
@@ -224,6 +241,15 @@ export const actionHandlers = handleThunks({
         ...moviesWithRemovedFiles.map((movie) => {
           return updateItem({
             section: 'movies',
+            ...movie,
+            movieFileId: 0,
+            hasFile: false
+          });
+        }),
+
+        ...catalogMoviesWithRemovedFiles.map((movie) => {
+          return updateItem({
+            section: 'movies.catalog',
             ...movie,
             movieFileId: 0,
             hasFile: false

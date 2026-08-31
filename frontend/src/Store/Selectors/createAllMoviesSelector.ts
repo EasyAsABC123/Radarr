@@ -3,10 +3,8 @@ import AppState from 'App/State/AppState';
 
 function createAllMoviesSelector() {
   return createSelector(
-    (state: AppState) => state.movies,
-    (movies) => {
-      return movies.items;
-    }
+    (state: AppState) => state.movies.catalog.items,
+    (movies) => movies
   );
 }
 

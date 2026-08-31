@@ -10,11 +10,13 @@ import FormLabel from 'Components/Form/FormLabel';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
+import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
+import useApiQuery from 'Helpers/Hooks/useApiQuery';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
   icons,
@@ -24,7 +26,9 @@ import {
   tooltipPositions,
 } from 'Helpers/Props';
 import MoveMovieModal from 'Movie/MoveMovie/MoveMovieModal';
+import Movie from 'Movie/Movie';
 import useMovie from 'Movie/useMovie';
+import { updateItem } from 'Store/Actions/baseActions';
 import { saveMovie, setMovieValue } from 'Store/Actions/movieActions';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
@@ -45,6 +49,22 @@ function EditMovieModalContent({
   onDeleteMoviePress,
 }: EditMovieModalContentProps) {
   const dispatch = useDispatch();
+  const fullMovie = useSelector((state: AppState) => {
+    const index = state.movies.itemMap[movieId];
+
+    return index == null ? undefined : state.movies.items[index];
+  });
+  const { data: requestedMovie, isLoading } = useApiQuery<Movie>({
+    path: `/movie/${movieId}`,
+    queryOptions: { enabled: fullMovie == null },
+  });
+
+  useEffect(() => {
+    if (requestedMovie) {
+      dispatch(updateItem({ section: 'movies', ...requestedMovie }));
+    }
+  }, [requestedMovie, dispatch]);
+
   const {
     title,
     monitored,
@@ -154,6 +174,10 @@ function EditMovieModalContent({
       onModalClose();
     }
   }, [isSaving, wasSaving, saveError, onModalClose]);
+
+  if (isLoading || !fullMovie) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <ModalContent onModalClose={onModalClose}>

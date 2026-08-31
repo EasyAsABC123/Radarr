@@ -13,8 +13,12 @@ export function createMovieSelector(movieId?: number) {
   return createSelector(
     (state: AppState) => state.movies.itemMap,
     (state: AppState) => state.movies.items,
-    (itemMap, allMovies) => {
-      return movieId ? allMovies[itemMap[movieId]] : undefined;
+    (state: AppState) => state.movies.catalog.itemMap,
+    (state: AppState) => state.movies.catalog.items,
+    (itemMap, allMovies, catalogItemMap, catalogMovies) => {
+      return movieId
+        ? allMovies[itemMap[movieId]] ?? catalogMovies[catalogItemMap[movieId]]
+        : undefined;
     }
   );
 }

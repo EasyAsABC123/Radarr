@@ -30,6 +30,11 @@ namespace NzbDrone.Integration.Test.Client
             return Get<PagingResource<MovieResource>>(request);
         }
 
+        public MovieCatalogResource Catalog()
+        {
+            return Get<MovieCatalogResource>(BuildRequest("catalog"));
+        }
+
         public List<MovieResource> SearchExisting(string term)
         {
             var request = BuildRequest("search");

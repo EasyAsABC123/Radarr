@@ -182,6 +182,13 @@ namespace Radarr.Api.V3.Movies
             return MovieQueryService.CreateFacets(AllMovie(null, true, languageId));
         }
 
+        [HttpGet("catalog")]
+        [Produces("application/json")]
+        public MovieCatalogResource GetMovieCatalog(int? languageId = null)
+        {
+            return MovieQueryService.CreateCatalog(AllMovie(null, true, languageId));
+        }
+
         [HttpGet("slug/{titleSlug}")]
         [Produces("application/json")]
         public ActionResult<MovieDetailsResource> GetMovieBySlug(string titleSlug)

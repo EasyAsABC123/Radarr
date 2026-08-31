@@ -6,9 +6,11 @@ export function createMovieSelectorForHook(movieId) {
   return createSelector(
     (state) => state.movies.itemMap,
     (state) => state.movies.items,
-    (itemMap, allMovies) => {
+    (state) => state.movies.catalog.itemMap,
+    (state) => state.movies.catalog.items,
+    (itemMap, allMovies, catalogItemMap, catalogMovies) => {
 
-      return movieId ? allMovies[itemMap[movieId]]: undefined;
+      return movieId ? allMovies[itemMap[movieId]] ?? catalogMovies[catalogItemMap[movieId]] : undefined;
     }
   );
 }
@@ -28,8 +30,10 @@ function createMovieSelector() {
     (state, { movieId }) => movieId,
     (state) => state.movies.itemMap,
     (state) => state.movies.items,
-    (movieId, itemMap, allMovies) => {
-      return allMovies[itemMap[movieId]];
+    (state) => state.movies.catalog.itemMap,
+    (state) => state.movies.catalog.items,
+    (movieId, itemMap, allMovies, catalogItemMap, catalogMovies) => {
+      return allMovies[itemMap[movieId]] ?? catalogMovies[catalogItemMap[movieId]];
     }
   );
 }

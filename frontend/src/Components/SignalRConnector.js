@@ -249,11 +249,13 @@ class SignalRConnector extends Component {
     const section = 'movies';
 
     if (action === 'created' || action === 'updated') {
-      this.props.dispatchUpdateItem({ section, ...body.resource });
+      this.props.dispatchUpdateItem({ section, updateOnly: true, ...body.resource });
+      this.props.dispatchUpdateItem({ section: 'movies.catalog', ...body.resource });
 
       repopulatePage('movieUpdated');
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({ section, id: body.resource.id });
+      this.props.dispatchRemoveItem({ section: 'movies.catalog', id: body.resource.id });
     }
 
     this.props.dispatchFetchMovieFacets();

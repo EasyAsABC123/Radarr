@@ -155,6 +155,21 @@ namespace NzbDrone.Integration.Test.ApiTests
 
         [Test]
         [Order(2)]
+        public void get_compact_movie_catalog_for_cross_page_lookups()
+        {
+            var movie = EnsureMovie(680, "Pulp Fiction");
+
+            var catalog = Movies.Catalog();
+            var catalogMovie = catalog.Records.Single(v => v.Id == movie.Id);
+
+            catalog.Facets.TotalRecords.Should().Be(catalog.Records.Count);
+            catalogMovie.Title.Should().Be(movie.Title);
+            catalogMovie.TmdbId.Should().Be(movie.TmdbId);
+            catalogMovie.QualityProfileId.Should().Be(movie.QualityProfileId);
+        }
+
+        [Test]
+        [Order(2)]
         public void search_and_slug_lookup_should_return_existing_movies()
         {
             var movie = EnsureMovie(680, "Pulp Fiction");

@@ -77,6 +77,9 @@ interface MoviesAppState
     totalRecords?: number;
   };
   jumpBar: Record<string, { count: number; page: number }>;
+  catalog: AppSectionState<Movie> & {
+    itemMap: Record<number, number>;
+  };
 
   deleteOptions: {
     addImportExclusion: boolean;

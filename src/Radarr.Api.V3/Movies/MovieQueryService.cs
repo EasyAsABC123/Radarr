@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Movies;
 using Radarr.Http;
 
 namespace Radarr.Api.V3.Movies
@@ -41,6 +42,40 @@ namespace Radarr.Api.V3.Movies
         public List<int> QualityProfileIds { get; set; } = new();
         public List<int> TmdbIds { get; set; } = new();
         public int TotalRecords { get; set; }
+    }
+
+    public class MovieCatalogResource
+    {
+        public List<MovieCatalogItemResource> Records { get; set; } = new();
+        public MovieFacetResource Facets { get; set; }
+    }
+
+    public class MovieCatalogItemResource
+    {
+        public int Id { get; set; }
+        public int TmdbId { get; set; }
+        public string ImdbId { get; set; }
+        public string Title { get; set; }
+        public string SortTitle { get; set; }
+        public string TitleSlug { get; set; }
+        public int Year { get; set; }
+        public MovieStatusType Status { get; set; }
+        public bool Monitored { get; set; }
+        public bool IsAvailable { get; set; }
+        public bool? HasFile { get; set; }
+        public int MovieFileId { get; set; }
+        public int QualityProfileId { get; set; }
+        public MovieStatusType MinimumAvailability { get; set; }
+        public string Path { get; set; }
+        public string RootFolderPath { get; set; }
+        public HashSet<int> Tags { get; set; } = new();
+        public MovieCatalogStatisticsResource Statistics { get; set; }
+    }
+
+    public class MovieCatalogStatisticsResource
+    {
+        public int MovieFileCount { get; set; }
+        public long SizeOnDisk { get; set; }
     }
 
     public class MovieLinkResource
@@ -126,6 +161,39 @@ namespace Radarr.Api.V3.Movies
                 QualityProfileIds = movies.Select(movie => movie.QualityProfileId).Distinct().OrderBy(id => id).ToList(),
                 TmdbIds = movies.Select(movie => movie.TmdbId).Distinct().OrderBy(id => id).ToList(),
                 TotalRecords = movies.Count
+            };
+        }
+
+        public static MovieCatalogResource CreateCatalog(List<MovieResource> movies)
+        {
+            return new MovieCatalogResource
+            {
+                Records = movies.Select(movie => new MovieCatalogItemResource
+                {
+                    Id = movie.Id,
+                    TmdbId = movie.TmdbId,
+                    ImdbId = movie.ImdbId,
+                    Title = movie.Title,
+                    SortTitle = movie.SortTitle,
+                    TitleSlug = movie.TitleSlug,
+                    Year = movie.Year,
+                    Status = movie.Status,
+                    Monitored = movie.Monitored,
+                    IsAvailable = movie.IsAvailable,
+                    HasFile = movie.HasFile,
+                    MovieFileId = movie.MovieFileId,
+                    QualityProfileId = movie.QualityProfileId,
+                    MinimumAvailability = movie.MinimumAvailability,
+                    Path = movie.Path,
+                    RootFolderPath = movie.RootFolderPath,
+                    Tags = movie.Tags,
+                    Statistics = movie.Statistics == null ? null : new MovieCatalogStatisticsResource
+                    {
+                        MovieFileCount = movie.Statistics.MovieFileCount,
+                        SizeOnDisk = movie.Statistics.SizeOnDisk
+                    }
+                }).ToList(),
+                Facets = CreateFacets(movies)
             };
         }
 
